@@ -1,0 +1,5 @@
+# Put_Line with variables and Get_Line
+Get_Line(X);
+Put_Line(X);
+A := 42;
+Put_Line(A);

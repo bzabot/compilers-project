@@ -1,0 +1,27 @@
+Implementar parentesis
+Ada é case-insensitive para keywords e identificadores
+Do you need the "boiler" code of ADA?
+
+
+    Passo para criar:
+
+    Mudar ast.c e ast.h
+    Mudar scanner.flex
+    Adicionar o parser.h
+    Adicionar parser.bison (tokens e funções)
+
+
+# Adicionar Assign com arvore para printar (OK)
+# Adicionar multiplos comandos (OK)
+# Adicionar Expressoes Aritméticas (OK)
+# Adicionar Expressoes Booleanas -> For now you can use a bool assignment
+# Adicionar Expressoes Logicas -> For now you can use a logic assignment
+# Adicionar Put_Line 
+# Adicionar Get_Line
+# Adicionar if then else 
+# Adicionar while
+
+Add Hierarchy to the ast
+Add parentesis
+Case insensitive (DONE, need to test)
+Understand how everything works
