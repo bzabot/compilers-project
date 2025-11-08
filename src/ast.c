@@ -16,6 +16,14 @@ Expr *ast_integer(int v)
   return node;
 }
 
+Expr *ast_float(float v)
+{
+  Expr *node = (Expr *)malloc(sizeof(Expr));
+  node->kind = E_FLOAT;
+  node->attr.fvalue = v;
+  return node;
+}
+
 Expr *ast_variable(char *id)
 {
   Expr *node = (Expr *)malloc(sizeof(Expr));
@@ -81,6 +89,15 @@ Cmd *ast_assignment(char *id, Expr *expr)
   node->kind = E_ASSIGNMENT;
   node->attr.assignment.id = id;
   node->attr.assignment.expr = expr;
+  return node;
+}
+
+Cmd *ast_bool_assignment(char *id, BoolExpr *expr)
+{
+  Cmd *node = (Cmd *)malloc(sizeof(Cmd));
+  node->kind = E_BOOL_ASSIGNMENT;
+  node->attr.bool_assignment.id = id;
+  node->attr.bool_assignment.expr = expr;
   return node;
 }
 

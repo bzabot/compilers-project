@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "parser.h"
-#include "evalAST.c"
 #include "printAST.c"
 
 int main(int argc, char **argv)
@@ -32,13 +31,11 @@ int main(int argc, char **argv)
     {
       printAbsTree(root, 0);
       printf("\n");
-      printf(" = %d\n", eval(root));
     }
     else if (root2 != 0)
     {
       printBoolAbsTree(root2, 0);
       printf("\n");
-      printf(" = %d\n", evalBool(root2));
     }
     else if (cmd_root != 0)
     {

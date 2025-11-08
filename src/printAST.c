@@ -18,6 +18,10 @@ void printAbsTree(Expr *expr, int depth)
     {
         printf("INT: %d", expr->attr.value);
     }
+    else if (expr->kind == E_FLOAT)
+    {
+        printf("FLOAT: %f", expr->attr.fvalue);
+    }
     else if (expr->kind == E_VARIABLE)
     {
         printf("VAR: %s", expr->attr.id);
@@ -145,6 +149,12 @@ void printCmd(Cmd *cmd, int depth)
         printf("ASSIGNMENT: %s", cmd->attr.assignment.id);
         printf("\n");
         printAbsTree(cmd->attr.assignment.expr, depth + 1);
+    }
+    else if (cmd->kind == E_BOOL_ASSIGNMENT)
+    {
+        printf("BOOL_ASSIGNMENT: %s", cmd->attr.bool_assignment.id);
+        printf("\n");
+        printBoolAbsTree(cmd->attr.bool_assignment.expr, depth + 1);
     }
     else if (cmd->kind == E_IF_THEN_ELSE)
     {

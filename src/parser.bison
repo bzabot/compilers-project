@@ -1,6 +1,7 @@
 // Tokens
 %token 
   INT  
+  FLOAT
   PLUS
   MINUS
   TIMES
@@ -54,6 +55,7 @@
 // Types/values in association to grammar symbols.
 %union {
   int intValue;
+  float floatValue;
   char* strValue;
   Expr* exprValue; 
   BoolExpr* boolExprValue;
@@ -61,6 +63,7 @@
 }
 
 %type <intValue> INT
+%type <floatValue> FLOAT
 %type <strValue> ID
 %type <exprValue> expr
 %type <boolExprValue> boolExpr
@@ -115,6 +118,10 @@ AdaProgram:
 expr: 
   INT { 
     $$ = ast_integer($1); 
+  }
+  |
+  FLOAT {
+    $$ = ast_float($1);
   }
   |
   ID {
@@ -209,7 +216,11 @@ Cmds:
 Cmd:
   ID ASSIGN expr {
     $$ = ast_assignment($1, $3);
-  } 
+  }
+  |
+  ID ASSIGN boolExpr {
+    $$ = ast_bool_assignment($1, $3);
+  }
   |
   IF boolExpr THEN Cmds ELSE Cmds END IF{
     $$ = ast_if_then_else($2, $4, $6);
@@ -225,10 +236,6 @@ Cmd:
   |
   PUT_LINE LPAREN boolExpr RPAREN {
     $$ = ast_put_line_bool($3);
-  }
-  |
-  PUT_LINE LPAREN ID RPAREN {
-    $$ = ast_put_line_id($3);
   }
   |
   GET_LINE LPAREN ID RPAREN {

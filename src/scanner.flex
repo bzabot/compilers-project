@@ -33,15 +33,20 @@ int yyline = 1;
 "end" { return END; }
 "loop" { return LOOP; }
 
-
 [a-zA-Z_][a-zA-Z0-9_]* { 
-   yylval.strValue = strdup(yytext);  // NEW: Allocate string for ID
+   yylval.strValue = strdup(yytext); 
    return ID; 
 }
 \-?[0-9]+ { 
    yylval.intValue = atoi(yytext);
    return INT; 
 }
+
+\-?[0-9]+\.[0-9]+ {
+   yylval.floatValue = atof(yytext);
+   return FLOAT;
+}
+
 "+" { return PLUS; }
 "-" { return MINUS; }
 "*" { return TIMES; }
@@ -57,7 +62,6 @@ int yyline = 1;
 ";" { return SEMICOLON; }
 "(" { return LPAREN; }
 ")" { return RPAREN; }
-
 
 .  { yyerror("unexpected character"); }
 %%
