@@ -1,6 +1,0 @@
-procedure Main is
-begin
-  x := 10;
-  y := 20;
-  Put_Line(x);
-end Main;

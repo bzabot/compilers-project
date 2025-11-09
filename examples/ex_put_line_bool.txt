@@ -1,3 +1,0 @@
-# Put_Line with boolean expressions
-Put_Line(1 = 1);
-Put_Line(2 < 3 and 4 > 2);

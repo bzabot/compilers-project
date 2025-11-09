@@ -1,6 +1,0 @@
-Put_Line("Hello, world!");
-Put_Line("Result: " & Integer'Image(A));
-Put_Line("Boolean: " & Boolean'Image(X));
-Put_Line("Hello, world!");
-Put_Line("Result: " & Integer'Image(A));
-Put_Line("Boolean: " & Boolean'Image(X));

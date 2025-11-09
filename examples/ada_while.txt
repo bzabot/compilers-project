@@ -1,7 +1,0 @@
-procedure Loop_Example is
-begin
-  counter := 0;
-  while 5 > 3 loop
-    Put_Line(counter);
-  end loop;
-end Loop_Example;

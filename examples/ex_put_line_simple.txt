@@ -1,3 +1,0 @@
-# Put_Line with expressions
-Put_Line(42);
-Put_Line(1 + 2 * 3);

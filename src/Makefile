@@ -20,5 +20,6 @@ clean:
 test: $(PROGRAM)
 	$(PROGRAM) ./examples/complete_program.ada
 	$(PROGRAM) ./examples/complex_program.ada
+	$(PROGRAM) ./examples/complex_program.txt
 	$(PROGRAM) ./examples/expressions.txt
 

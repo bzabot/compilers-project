@@ -1,6 +1,0 @@
-while 5 < 10 loop
-   Put_Line(A);
-end loop;
-while 5 < 10 loop
-   Put_Line(A);
-end loop;

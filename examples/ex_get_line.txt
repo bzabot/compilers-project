@@ -1,4 +1,0 @@
-Get_Line(Input);
-A := Integer'Value(Input);
-Get_Line(Input);
-A := Integer'Value(Input);
