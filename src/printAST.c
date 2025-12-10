@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "parser.h"
+#include "tac.h"
 
 void printAbsTree(Expr *expr, int depth)
 {
@@ -149,6 +150,9 @@ void printCmd(Cmd *cmd, int depth)
         printf("ASSIGNMENT: %s", cmd->attr.assignment.id);
         printf("\n");
         printAbsTree(cmd->attr.assignment.expr, depth + 1);
+        printf("\n");
+        // transExp(cmd->attr.assignment.expr, cmd->attr.assignment.id); // Removed: Code generation is now handled by codegen.c
+
     }
     else if (cmd->kind == E_BOOL_ASSIGNMENT)
     {

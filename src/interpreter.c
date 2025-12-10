@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "parser.h"
 #include "printAST.c"
+#include "semantics.h"
+#include "codegen.h"
 
 int main(int argc, char **argv)
 {
@@ -14,18 +16,17 @@ int main(int argc, char **argv)
       printf("'%s': could not open file\n", *argv);
       return 1;
     }
-  } //  yyin = stdin
+  } 
   if (yyparse() == 0)
   {
     if (program_root != 0)
     {
-      printf("PROCEDURE: %s\n", program_root->procedure_name);
-      printf("BEGIN\n");
-      if (program_root->body != 0)
-      {
-        printCmd(program_root->body, 1);
+      if (check_semantics(program_root) != 0) {
+          fprintf(stderr, "Compilation failed due to semantic errors.\n");
+          return 1;
       }
-      printf("\nEND %s\n", program_root->procedure_name);
+
+      generate_code(program_root);
     }
     else if (root != 0)
     {
