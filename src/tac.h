@@ -1,30 +1,52 @@
 #ifndef TAC_H
 #define TAC_H
 
-#include "ast.h" 
+#include "ast.h"
 
-// Generates a new temporary variable name
+typedef enum {
+    TAC_ASSIGN_INT,      // dest = constant
+    TAC_ASSIGN_VAR,      // dest = src
+    TAC_BIN_OP,          // dest = src1 op src2
+    TAC_LABEL,           // label:
+    TAC_JUMP,            // goto label
+    TAC_COND_JUMP,       // if src1 relop src2 goto label
+    TAC_PRINT,           // print src
+    TAC_READ             // read dest
+} TacOpcode;
+
+typedef struct TacInstruction {
+    TacOpcode opcode;
+    char *dest;          // Destination operand
+    char *src1;          // Source operand 1
+    char *src2;          // Source operand 2
+    int int_val;         // Integer constant value
+    int op;              // Operator (for binary operations and conditionals)
+    struct TacInstruction *next;
+} TacInstruction;
+
+typedef struct {
+    TacInstruction *head;
+    TacInstruction *tail;
+} TacList;
+
+TacList* create_tac_list();
+void append_tac(TacList *list, TacInstruction *instr);
+void print_tac_list(TacList *list);  // Print TAC in human-readable format
+void free_tac_list(TacList *list);
+
+TacInstruction* tac_assign_int(char *dest, int val);
+TacInstruction* tac_assign_var(char *dest, char *src);
+TacInstruction* tac_bin_op(char *dest, char *src1, int op, char *src2);
+TacInstruction* tac_label(char *label);
+TacInstruction* tac_jump(char *label);
+TacInstruction* tac_cond_jump(char *src1, int relop, char *src2, char *label);
+TacInstruction* tac_print(char *src);
+TacInstruction* tac_read(char *dest);
+
+
 int newTemp();
-// Generates a new label name
 int newLabel();
 
-// Initialization and Finalization
-void emit_init();
-void emit_end();
 
-// Operations
-void emit_assign_int(char *dest, int val);
-void emit_assign_float(char *dest, float val);
-void emit_assign_var(char *dest, char *src);
-void emit_bin_op(int op, char *dest, char *s1, char *s2);
-
-// Control Flow
-void emit_label(char *label);
-void emit_jump(char *label);
-void emit_cond_jump(char *s1, int relop, char *s2, char *label);
-
-// IO
-void emit_print(char *src);
-void emit_read(char *dest);
 
 #endif

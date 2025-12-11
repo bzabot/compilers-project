@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     if (program_root != 0)
     {
       if (check_semantics(program_root) != 0) {
-          fprintf(stderr, "Compilation failed due to semantic errors.\n");
+          fprintf(stderr, "Compilation failed: semantic errors.\n");
           return 1;
       }
 

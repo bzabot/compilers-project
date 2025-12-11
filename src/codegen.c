@@ -3,22 +3,25 @@
 #include <string.h>
 #include "codegen.h"
 #include "tac.h"
+#include "mips.h"
 #include "parser.h" 
+
+static TacList *tac_list;
 
 static void transExp(Expr *expr, char* dest) {
     if (!expr) return;
 
     switch(expr->kind) {
         case E_INTEGER:
-            emit_assign_int(dest, expr->attr.value);
+            append_tac(tac_list, tac_assign_int(dest, expr->attr.value));
             break;
         
         case E_FLOAT:
-            emit_assign_float(dest, expr->attr.fvalue);
+            append_tac(tac_list, tac_assign_int(dest, (int)expr->attr.fvalue));
             break;
 
         case E_VARIABLE:
-            emit_assign_var(dest, expr->attr.id);
+            append_tac(tac_list, tac_assign_var(dest, expr->attr.id));
             break;
 
         case E_OPERATION: {
@@ -29,7 +32,7 @@ static void transExp(Expr *expr, char* dest) {
             transExp(expr->attr.op.left, t1);
             transExp(expr->attr.op.right, t2);
             
-            emit_bin_op(expr->attr.op.operator, dest, t1, t2);
+            append_tac(tac_list, tac_bin_op(dest, t1, expr->attr.op.operator, t2));
             break;
         }
     }
@@ -40,8 +43,10 @@ static void transCond(BoolExpr *expr, char* trueLabel, char* falseLabel) {
 
     switch(expr->kind) {
         case E_BOOL_INTEGER:
-            if (expr->attr.value) emit_jump(trueLabel);
-            else emit_jump(falseLabel);
+            if (expr->attr.value) 
+                append_tac(tac_list, tac_jump(trueLabel));
+            else 
+                append_tac(tac_list, tac_jump(falseLabel));
             break;
 
         case E_BOOL_RELOP: {
@@ -52,8 +57,8 @@ static void transCond(BoolExpr *expr, char* trueLabel, char* falseLabel) {
             transExp(expr->attr.op.left, t1);
             transExp(expr->attr.op.right, t2);
             
-            emit_cond_jump(t1, expr->attr.op.relop, t2, trueLabel);
-            emit_jump(falseLabel);
+            append_tac(tac_list, tac_cond_jump(t1, expr->attr.op.relop, t2, trueLabel));
+            append_tac(tac_list, tac_jump(falseLabel));
             break;
         }
 
@@ -62,13 +67,13 @@ static void transCond(BoolExpr *expr, char* trueLabel, char* falseLabel) {
                 char l_mid[16];
                 sprintf(l_mid, "L%d", newLabel());
                 transCond(expr->attr.bin.left, l_mid, falseLabel);
-                emit_label(l_mid);
+                append_tac(tac_list, tac_label(l_mid));
                 transCond(expr->attr.bin.right, trueLabel, falseLabel);
             } else if (expr->attr.bin.logic_op == OR) {
                 char l_mid[16];
                 sprintf(l_mid, "L%d", newLabel());
                 transCond(expr->attr.bin.left, trueLabel, l_mid);
-                emit_label(l_mid);
+                append_tac(tac_list, tac_label(l_mid));
                 transCond(expr->attr.bin.right, trueLabel, falseLabel);
             }
             break;
@@ -90,7 +95,7 @@ static void transCmd(Cmd *cmd) {
             char t1[16];
             sprintf(t1, "t%d", newTemp());
             transExp(cmd->attr.assignment.expr, t1);
-            emit_assign_var(cmd->attr.assignment.id, t1);
+            append_tac(tac_list, tac_assign_var(cmd->attr.assignment.id, t1));
             break;
         }
         
@@ -102,14 +107,14 @@ static void transCmd(Cmd *cmd) {
             
             transCond(cmd->attr.bool_assignment.expr, l_true, l_false);
             
-            emit_label(l_true);
-            emit_assign_int(cmd->attr.bool_assignment.id, 1);
-            emit_jump(l_end);
+            append_tac(tac_list, tac_label(l_true));
+            append_tac(tac_list, tac_assign_int(cmd->attr.bool_assignment.id, 1));
+            append_tac(tac_list, tac_jump(l_end));
             
-            emit_label(l_false);
-            emit_assign_int(cmd->attr.bool_assignment.id, 0);
+            append_tac(tac_list, tac_label(l_false));
+            append_tac(tac_list, tac_assign_int(cmd->attr.bool_assignment.id, 0));
             
-            emit_label(l_end);
+            append_tac(tac_list, tac_label(l_end));
             break;
         }
         
@@ -121,16 +126,16 @@ static void transCmd(Cmd *cmd) {
 
             transCond(cmd->attr.if_then_else.condition, l_true, l_false);
             
-            emit_label(l_true);
+            append_tac(tac_list, tac_label(l_true));
             transCmd(cmd->attr.if_then_else.then_cmd);
-            emit_jump(l_end);
+            append_tac(tac_list, tac_jump(l_end));
             
-            emit_label(l_false);
+            append_tac(tac_list, tac_label(l_false));
             if (cmd->attr.if_then_else.else_cmd) {
                 transCmd(cmd->attr.if_then_else.else_cmd);
             }
             
-            emit_label(l_end);
+            append_tac(tac_list, tac_label(l_end));
             break;
         }
 
@@ -140,14 +145,14 @@ static void transCmd(Cmd *cmd) {
             sprintf(l_body, "L%d", newLabel());
             sprintf(l_end, "L%d", newLabel());
 
-            emit_label(l_start);
+            append_tac(tac_list, tac_label(l_start));
             transCond(cmd->attr.while_loop.condition, l_body, l_end);
             
-            emit_label(l_body);
+            append_tac(tac_list, tac_label(l_body));
             transCmd(cmd->attr.while_loop.body);
-            emit_jump(l_start);
+            append_tac(tac_list, tac_jump(l_start));
             
-            emit_label(l_end);
+            append_tac(tac_list, tac_label(l_end));
             break;
         }
 
@@ -161,7 +166,7 @@ static void transCmd(Cmd *cmd) {
                 char t1[16];
                 sprintf(t1, "t%d", newTemp());
                 transExp(cmd->attr.put_line.value.expr, t1);
-                emit_print(t1);
+                append_tac(tac_list, tac_print(t1));
             } else if (cmd->attr.put_line.print_type == PRINT_BOOL) {
                 char t1[16];
                 char l_true[16], l_false[16], l_end[16];
@@ -172,29 +177,36 @@ static void transCmd(Cmd *cmd) {
                 
                 transCond(cmd->attr.put_line.value.bool_expr, l_true, l_false);
                 
-                emit_label(l_true);
-                emit_assign_int(t1, 1);
-                emit_jump(l_end);
+                append_tac(tac_list, tac_label(l_true));
+                append_tac(tac_list, tac_assign_int(t1, 1));
+                append_tac(tac_list, tac_jump(l_end));
                 
-                emit_label(l_false);
-                emit_assign_int(t1, 0);
+                append_tac(tac_list, tac_label(l_false));
+                append_tac(tac_list, tac_assign_int(t1, 0));
                 
-                emit_label(l_end);
-                emit_print(t1);
+                append_tac(tac_list, tac_label(l_end));
+                append_tac(tac_list, tac_print(t1));
             } else if (cmd->attr.put_line.print_type == PRINT_ID) {
-                emit_print(cmd->attr.put_line.value.id);
+                append_tac(tac_list, tac_print(cmd->attr.put_line.value.id));
             }
             break;
         
         case E_GET_LINE:
-            emit_read(cmd->attr.get_line.id);
+            append_tac(tac_list, tac_read(cmd->attr.get_line.id));
             break;
     }
 }
 
 void generate_code(Program *program) {
     if (!program) return;
-    emit_init();
+    
+    // Generate TAC 
+    tac_list = create_tac_list();
     transCmd(program->body);
-    emit_end();
+    print_tac_list(tac_list);
+    
+    // Generate MIPS from TAC 
+    generate_mips_from_tac(tac_list);
+    
+    free_tac_list(tac_list);
 }
